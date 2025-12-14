@@ -53,6 +53,7 @@ Alx_Capstone_Project/
 
 5. **Apply Migrations**
    ```bash
+   python manage.py makemigrations
    python manage.py migrate
 
 6. **Run The Server**
@@ -62,6 +63,24 @@ Alx_Capstone_Project/
 
 
 **API Endpoints**
+Users
+- POST /api/users/ → Register a new user
+Example payload:
+{
+  "username": "benjamin",
+  "email": "benjamin@example.com",
+  "password": "securepassword"
+}
+- GET /api/users/ → List all users
+- GET /api/users/<id>/ → Retrieve a single user
+- PUT /api/users/<id>/ → Update user info
+Example payload:
+{
+  "email": "newemail@example.com",
+  "is_active": true
+}
+- DELETE /api/users/<id>/ → Deactivate or delete user
+
 Tasks
 POST /api/tasks/ → Create a new task Example payload:
 
