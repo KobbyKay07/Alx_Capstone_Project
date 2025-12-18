@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from rest_framework import generics
 from .models import Users, Tasks
 from .serializers import TaskSerializer, UserSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 
 # Create your views here.
 def home(request):
@@ -38,7 +40,7 @@ def mark_task_in_progress(request, pk):
     task.is_completed = False
     task.completed_at = None
     task.save()
-    
+
     return Response(TaskSerializer(task).data)
 
 @api_view(['PATCH'])
@@ -70,6 +72,13 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Tasks.objects.all()
     serializer_class = TaskSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filterset_fields = ['status', 'priority', 'due_date']
+    ordering_fields = ['due_date', 'priority', 'created_at']
+    search_fields = ['title', 'description']
+
+    def get_queryset(self):  
+        return Tasks.objects.filter(user=self.request.user)
 
 # Retrieve, Update & Delete Task
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
