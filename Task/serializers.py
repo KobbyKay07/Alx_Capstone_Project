@@ -1,10 +1,14 @@
 from rest_framework import serializers
-from .models import Tasks, Users
+from .models import Tasks
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = User
         fields = ["id", "username", "email", "date_joined", "is_active"]
 
 class TaskSerializer(serializers.ModelSerializer):

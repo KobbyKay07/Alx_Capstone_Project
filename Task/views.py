@@ -79,6 +79,9 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):  
         return Tasks.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 # Retrieve, Update & Delete Task
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
