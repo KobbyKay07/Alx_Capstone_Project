@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Tasks, Category, TaskHistory
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from datetime import timedelta
 
 
 User = get_user_model()
@@ -87,6 +88,28 @@ class TaskSerializer(serializers.ModelSerializer):
 
         if old_status != 'completed' and new_status == 'completed':
             instance.completed_at = timezone.now()
+
+            # Handle recurrence
+        if instance.recurrence != "none":
+            new_due_date = None
+            if instance.recurrence == "daily":
+                new_due_date = instance.due_date + timedelta(days=1)
+            elif instance.recurrence == "weekly":
+                new_due_date = instance.due_date + timedelta(weeks=1)
+            elif instance.recurrence == "monthly":
+                new_due_date = instance.due_date + timedelta(days=30)
+
+            Tasks.objects.create(
+                title=instance.title,
+                description=instance.description,
+                due_date=new_due_date,
+                priority=instance.priority,
+                status="pending",
+                user=instance.user,
+                recurrence=instance.recurrence,
+                category=instance.category,
+            )
+            
         elif old_status == 'completed' and new_status != 'completed':
             instance.completed_at = None
         
