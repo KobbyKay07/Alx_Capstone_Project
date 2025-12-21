@@ -52,3 +52,12 @@ class Tasks(models.Model):
 
     def __str__(self):
         return self.title
+    
+class TaskHistory(models.Model):
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name="history")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=15)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.task.title} - {self.status} at {self.changed_at}"
