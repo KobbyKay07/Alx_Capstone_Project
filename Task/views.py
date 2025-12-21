@@ -15,6 +15,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.contrib.auth import get_user_model
 from rest_framework.throttling import UserRateThrottle
+from django.db import models
 
 # Create your views here.
 User = get_user_model()
@@ -143,7 +144,10 @@ class TaskListCreateView(generics.ListCreateAPIView):
     search_fields = ['title', 'description']
 
     def get_queryset(self):  
-        return Tasks.objects.filter(user=self.request.user)
+        return Tasks.objects.filter(
+            models.Q(user=self.request.user) |
+            models.Q(collaborators=self.request.user)
+        ).distinct()
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
