@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (TaskListCreateView, TaskDetailView, UserListCreateView, UserSignUpView, 
                     UserDetailView, mark_task_in_progress, mark_task_pending, mark_task_complete,
-                    CategoryListCreateView)
+                    CategoryListCreateView, TaskHistoryListView
+                    )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 
 urlpatterns = [
@@ -23,5 +24,7 @@ urlpatterns = [
     # JWT logout (blacklist refresh token)
     path("token/logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
     # Category endpoint
-    path("categories/", CategoryListCreateView.as_view(), name="category-list-create")
+    path("categories/", CategoryListCreateView.as_view(), name="category-list-create"),
+    # History endpoint
+    path("tasks/history/", TaskHistoryListView.as_view(), name="task-history")
 ]
