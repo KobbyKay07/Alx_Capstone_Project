@@ -6,8 +6,8 @@ from rest_framework import status
 from django.utils import timezone
 from django.http import HttpResponse
 from rest_framework import generics
-from .models import Tasks, Category
-from .serializers import TaskSerializer, UserSerializer, CategorySerializer
+from .models import Tasks, Category, TaskHistory
+from .serializers import TaskSerializer, UserSerializer, CategorySerializer, TaskHistorySerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.contrib.auth import get_user_model
@@ -130,3 +130,10 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class TaskHistoryListView(generics.ListAPIView):
+    serializer_class = TaskHistorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TaskHistory.objects.filter(user=self.request.user)
