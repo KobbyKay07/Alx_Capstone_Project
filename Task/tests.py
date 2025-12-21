@@ -7,6 +7,9 @@ from django.utils import timezone
 from datetime import timedelta
 
 User = get_user_model()
+"""
+Models & Serializers Tests
+"""
 
 class TaskModelTest(TestCase):
     def setUp(self):
@@ -159,3 +162,98 @@ class CollaboratorTest(TestCase):
 
     def test_collaborator_added(self):
         self.assertIn(self.collaborator, self.task.collaborators.all())
+
+"""
+API Tests
+"""
+class CategoryAPITest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", email="test@example.com", password="pass123")
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_category(self):
+        response = self.client.post("/api/categories/", {"name": "Work"}, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["name"], "Work")
+
+    def test_list_categories(self):
+        Category.objects.create(name="Personal", user=self.user)
+        response = self.client.get("/api/categories/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+
+class CollaboratorAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", email="owner@example.com", password="pass123")
+        self.collaborator = User.objects.create_user(username="collab", email="collab@example.com", password="pass123")
+        self.client.force_authenticate(user=self.owner)
+        self.task = Tasks.objects.create(
+            title="Collab Task",
+            description="Testing collaborators",
+            user=self.owner,
+            due_date=timezone.now() + timedelta(days=1)
+        )
+
+    def test_add_collaborator(self):
+        response = self.client.post(f"/api/tasks/{self.task.id}/add-collaborator/", {"collaborator_id": self.collaborator.id}, format="json")
+        self.assertEqual(response.status_code, 200)
+    
+    def test_list_collaborators(self):
+        self.task.collaborators.add(self.collaborator)
+        response = self.client.get(f"/api/tasks/{self.task.id}/collaborators/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+
+class RecurrenceAPITest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", email="test@example.com", password="pass123")
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_recurring_task(self):
+        response = self.client.post("/api/tasks/", {
+            "title": "Daily Task",
+            "description": "Recurring",
+            "due_date": (timezone.now() + timedelta(days=1)).isoformat(),
+            "status": "pending",
+            "recurrence": "daily"
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["recurrence"], "daily")
+
+
+class NotificationAPITest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", email="test@example.com", password="pass123")
+        self.client.force_authenticate(user=self.user)
+        self.task = Tasks.objects.create(
+            title="Notify Task",
+            description="Testing notifications",
+            user=self.user,
+            due_date=timezone.now() + timedelta(days=1)
+        )
+        Notification.objects.create(task=self.task, user=self.user, message="Task due soon")
+
+    def test_list_notifications(self):
+        response = self.client.get("/api/notifications/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+
+class HistoryAPITest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", email="test@example.com", password="pass123")
+        self.client.force_authenticate(user=self.user)
+        self.task = Tasks.objects.create(
+            title="History Task",
+            description="Testing history",
+            user=self.user,
+            due_date=timezone.now() + timedelta(days=1)
+        )
+        TaskHistory.objects.create(task=self.task, status="created", user=self.user)
+
+    def test_list_history(self):
+        response = self.client.get("/api/tasks/history/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
