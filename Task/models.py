@@ -49,6 +49,7 @@ class Tasks(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks")
+    collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="shared_tasks", blank=True)
 
     def __str__(self):
         return self.title
