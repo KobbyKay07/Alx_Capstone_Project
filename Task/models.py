@@ -11,6 +11,13 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
     
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="categories")
+
+    def __str__(self):
+        return self.name
+    
 class Tasks(models.Model):
     PRIORITY_CHOICES = [
         ('low', 'Low'),
@@ -24,15 +31,24 @@ class Tasks(models.Model):
         ('completed', 'Completed'),
     ]
 
+    RECURRENCE_CHOICES = [
+        ('none', 'None'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly')
+    ]
+
     title = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateTimeField()
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    recurrence = models.CharField(max_length=10, choices=RECURRENCE_CHOICES, default='none')
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks")
 
     def __str__(self):
         return self.title
