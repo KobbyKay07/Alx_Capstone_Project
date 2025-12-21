@@ -35,6 +35,11 @@ class TaskSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    collaborators = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        many=True,
+        required=False
+    )
     class Meta:
         model = Tasks
         fields = "__all__"
@@ -83,6 +88,10 @@ class TaskSerializer(serializers.ModelSerializer):
         return data
     
     def update(self, instance, validated_data):
+        collaborators = validated_data.pop("collaborators", None)
+        if collaborators is not None:
+            instance.collaborators.set(collaborators)
+    
         old_status = instance.status
         new_status = validated_data.get('status', old_status)
 
