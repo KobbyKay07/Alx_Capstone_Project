@@ -11,6 +11,7 @@ from .serializers import TaskSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.contrib.auth import get_user_model
+from rest_framework.throttling import UserRateThrottle
 
 # Create your views here.
 User = get_user_model()
@@ -87,6 +88,7 @@ class IsOwner(BasePermission):
 
 # Create & List Tasks 
 class TaskListCreateView(generics.ListCreateAPIView):
+    throttle_classes = [UserRateThrottle]
     queryset = Tasks.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
