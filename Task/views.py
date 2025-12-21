@@ -190,3 +190,18 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
     
+class CollaboratorListView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrCollaborator]
+
+    def get(self, request, pk):
+        try:
+            task = Tasks.objects.get(pk=pk)
+        except Tasks.DoesNotExist:
+            return Response({"error": "Task not found."}, status=404)
+
+        collaborators = task.collaborators.all()
+        serializer = UserSerializer(collaborators, many=True)
+        return Response(serializer.data)
+
+    
