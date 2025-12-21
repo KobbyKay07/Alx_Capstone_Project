@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (TaskListCreateView, TaskDetailView, UserListCreateView, UserSignUpView, 
                     UserDetailView, mark_task_in_progress, mark_task_pending, mark_task_complete,
-                    CategoryListCreateView, TaskHistoryListView, add_collaborator,
+                    CategoryListCreateView, TaskHistoryListView, add_collaborator,remove_collaborator,
+                    CollaboratorListView
                     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 
@@ -28,5 +29,7 @@ urlpatterns = [
     # History endpoint
     path("tasks/history/", TaskHistoryListView.as_view(), name="task-history"),
     # Collaborators endpoint
-    path("tasks/<int:pk>/add-collaborator/", add_collaborator, name="add-collaborator")
+    path("tasks/<int:pk>/add-collaborator/", add_collaborator, name="add-collaborator"),
+    path("tasks/<int:pk>/remove-collaborator/", remove_collaborator, name="remove-collaborator"),
+    path("tasks/<int:pk>/collaborators/", CollaboratorListView.as_view(), name="list-collaborators"),
 ]
