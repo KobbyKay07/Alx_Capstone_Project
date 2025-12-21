@@ -64,6 +64,24 @@ def mark_task_complete(request,pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_collaborator(request, pk):
+    try:
+        task = Tasks.objects.get(pk=pk, user=request.user)
+    except Tasks.DoesNotExist:
+        return Response({"error": "Task not found or not owned by you."}, status=404)
+
+    collaborator_id = request.data.get("collaborator_id")
+    try:
+        collaborator = User.objects.get(pk=collaborator_id)
+    except User.DoesNotExist:
+        return Response({"error": "Collaborator not found."}, status=404)
+
+    task.collaborators.add(collaborator)
+    return Response({"message": f"{collaborator.username} added as collaborator."})
+
+
 class UserSignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -88,6 +106,14 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
+    
+class IsOwnerOrCollaborator(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (
+            obj.user == request.user or
+            request.user in obj.collaborators.all() or
+            request.user.is_staff
+        )
 
 # Create & List Tasks 
 class TaskListCreateView(generics.ListCreateAPIView):
@@ -110,7 +136,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tasks.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwnerOrCollaborator]
 
     def perform_update(self, serializer):
         old_status = self.get_object().status
@@ -147,4 +173,4 @@ class NotificationListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
-
+    
