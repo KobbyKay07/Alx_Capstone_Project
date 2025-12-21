@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tasks
+from .models import Tasks, Category
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -20,8 +20,20 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
         )
         return user
+    
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']
 
 class TaskSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source="category",
+        write_only=True,
+        required=False
+    )
     class Meta:
         model = Tasks
         fields = "__all__"
