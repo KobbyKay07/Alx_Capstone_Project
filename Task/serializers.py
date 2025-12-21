@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tasks, Category, TaskHistory
+from .models import Tasks, Category, TaskHistory, Notification
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from datetime import timedelta
@@ -123,3 +123,9 @@ class TaskHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskHistory
         fields = ["id", "task", "user", "status", "changed_at"]
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ["id", "task", "message", "created_at", "is_read"]
+
