@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import (TaskListCreateView, TaskDetailView, UserListCreateView, 
+from .views import (TaskListCreateView, TaskDetailView, UserListCreateView, UserSignUpView, 
                     UserDetailView, mark_task_in_progress, mark_task_pending, mark_task_complete)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 
 urlpatterns = [
     # User endpoints
@@ -12,5 +13,12 @@ urlpatterns = [
     # Task status transition endpoints
     path('tasks/<int:pk>/pending/', mark_task_pending, name='task-pending'),
     path('tasks/<int:pk>/in-progress/', mark_task_in_progress, name='task-in-progress'),
-    path('tasks/<int:pk>/complete/', mark_task_complete, name='task-complete')
+    path('tasks/<int:pk>/complete/', mark_task_complete, name='task-complete'),
+     # Signup
+    path("signup/", UserSignUpView.as_view(), name="user-signup"),
+    # JWT login & refresh
+    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # JWT logout (blacklist refresh token)
+    path("token/logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
 ]

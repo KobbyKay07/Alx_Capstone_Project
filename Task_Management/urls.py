@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from Task.views import home
 
+
+
 urlpatterns = [
     path("", home, name="home"),
     path('admin/', admin.site.urls),
     path('api/', include('Task.urls')),
-    path('api/', include('rest_framework.urls'))
+    path('api/', include('rest_framework.urls')),
 ]
