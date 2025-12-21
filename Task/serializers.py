@@ -117,23 +117,6 @@ class TaskSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         
         instance.save()
-
-        # Notification logic
-        if instance.due_date - timezone.now() <= timedelta(hours=24):
-            already_exists = Notification.objects.filter(
-                user=instance.user,
-                task=instance,
-                message__icontains="due soon",
-                is_read=False
-            ).exists()
-
-            if not already_exists:
-                Notification.objects.create(
-                    user=instance.user,
-                    task=instance,
-                    message=f"Task '{instance.title}' is due soon!"
-                )
-
         return instance
     
 class TaskHistorySerializer(serializers.ModelSerializer):
