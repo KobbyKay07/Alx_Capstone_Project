@@ -81,6 +81,22 @@ def add_collaborator(request, pk):
     task.collaborators.add(collaborator)
     return Response({"message": f"{collaborator.username} added as collaborator."})
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def remove_collaborator(request, pk):
+    try:
+        task = Tasks.objects.get(pk=pk, user=request.user)
+    except Tasks.DoesNotExist:
+        return Response({"error": "Task not found or not owned by you."}, status=404)
+
+    collaborator_id = request.data.get("collaborator_id")
+    try:
+        collaborator = User.objects.get(pk=collaborator_id)
+    except User.DoesNotExist:
+        return Response({"error": "Collaborator not found."}, status=404)
+
+    task.collaborators.remove(collaborator)
+    return Response({"message": f"{collaborator.username} removed from collaborators."})
 
 class UserSignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
