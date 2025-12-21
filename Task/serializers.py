@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tasks, Category
+from .models import Tasks, Category, TaskHistory
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -95,3 +95,8 @@ class TaskSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
+    
+class TaskHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskHistory
+        fields = ["id", "task", "user", "status", "changed_at"]
