@@ -8,8 +8,8 @@ from django.http import HttpResponse
 from rest_framework import generics
 from .models import Tasks, Category, TaskHistory, Notification
 from .serializers import (
-    TaskSerializer, UserSerializer, CategorySerializer, TaskHistorySerializer, 
-    NotificationSerializer
+    TaskSerializer, UserSerializer, UserRegistrationSerializer, CategorySerializer, 
+    TaskHistorySerializer, NotificationSerializer
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -100,7 +100,7 @@ def remove_collaborator(request, pk):
 
 class UserSignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
 
 # Create & List Users
