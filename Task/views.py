@@ -138,6 +138,13 @@ def remove_collaborator(request, pk):
         return Response({"error": "User is not a collaborator on this task."}, status=status.HTTP_400_BAD_REQUEST)
 
     task.collaborators.remove(collaborator)
+
+    Notification.objects.create(
+        user=collaborator,
+        task=task,
+        message=f"You've been removed as a collaborator from task: {task.title}"
+    )
+
     return Response({"message": f"{collaborator.username} removed from collaborators."})
 
 class UserSignUpView(generics.CreateAPIView):
