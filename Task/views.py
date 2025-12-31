@@ -108,6 +108,13 @@ def add_collaborator(request, pk):
         return Response({"error": "User is already a collaborator."}, status=status.HTTP_400_BAD_REQUEST)
 
     task.collaborators.add(collaborator)
+    
+    Notification.objects.create(
+        user=collaborator,
+        task=task,
+        message=f"You've been added as a collaborator to task: {task.title}"
+    )
+
     return Response({"message": f"{collaborator.username} added as collaborator."})
 
 @api_view(["POST"])
