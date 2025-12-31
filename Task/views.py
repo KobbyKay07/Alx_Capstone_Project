@@ -108,7 +108,7 @@ def add_collaborator(request, pk):
         return Response({"error": "User is already a collaborator."}, status=status.HTTP_400_BAD_REQUEST)
 
     task.collaborators.add(collaborator)
-    
+
     Notification.objects.create(
         user=collaborator,
         task=task,
@@ -130,6 +130,12 @@ def remove_collaborator(request, pk):
         collaborator = User.objects.get(pk=collaborator_id)
     except User.DoesNotExist:
         return Response({"error": "Collaborator not found."}, status=404)
+    
+    if collaborator == request.user:
+        return Response({"error": "Cannot remove task owner as collaborator."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not task.collaborators.filter(pk=collaborator_id).exists():
+        return Response({"error": "User is not a collaborator on this task."}, status=status.HTTP_400_BAD_REQUEST)
 
     task.collaborators.remove(collaborator)
     return Response({"message": f"{collaborator.username} removed from collaborators."})
