@@ -16,7 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.contrib.auth import get_user_model
 from rest_framework.throttling import UserRateThrottle
-from django.db import models
+from django.db.models import Q
 
 # Create your views here.
 User = get_user_model()
@@ -30,11 +30,18 @@ def mark_task_pending(request,pk):
     try:
         task = Tasks.objects.get(pk=pk, user=request.user)
     except Tasks.DoesNotExist:
-        return Response({"error": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Task not found or not accessible."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not (task.user == request.user or request.user in task.collaborators.all() or request.user.is_staff):
+         return Response({"error": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
+    old_status = task.status
     serializer = TaskSerializer(task, data={"status": "pending"}, partial=True)
     if serializer.is_valid():
         serializer.save()
+
+        if old_status != "pending":
+            TaskHistory.objects.create(task=task, user=request.user, status="pending")
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,11 +51,18 @@ def mark_task_in_progress(request, pk):
     try:
         task = Tasks.objects.get(pk=pk, user=request.user)
     except Tasks.DoesNotExist:
-        return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Task not found or not accessible."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not (task.user == request.user or request.user in task.collaborators.all() or request.user.is_staff):
+         return Response({"error": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
+    old_staus = task.status
     serializer = TaskSerializer(task, data={"status": "in_progress"}, partial=True)
     if serializer.is_valid():
         serializer.save()
+
+        if old_staus != "in_progress":
+            TaskHistory.objects.create(task=task, user=request.user, status="in_progress")
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,11 +72,18 @@ def mark_task_complete(request,pk):
     try:
         task = Tasks.objects.get(pk=pk, user=request.user)
     except Tasks.DoesNotExist:
-        return Response({"error": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Task not found or not accessible."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not (task.user == request.user or request.user in task.collaborators.all() or request.user.is_staff):
+         return Response({"error": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
+    old_status = task.status
     serializer = TaskSerializer(task, data={"status": "completed"}, partial=True)
     if serializer.is_valid():
         serializer.save()
+
+        if old_status != "completed":
+             TaskHistory.objects.create(task=task, user=request.user, status="completed")
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -130,8 +151,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):  
         return Tasks.objects.filter(
-            models.Q(user=self.request.user) |
-            models.Q(collaborators=self.request.user)
+            Q(user=self.request.user) |
+            Q(collaborators=self.request.user)
         ).distinct()
     
     def perform_create(self, serializer):
