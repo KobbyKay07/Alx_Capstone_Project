@@ -182,7 +182,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
         ).distinct()
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        task = serializer.save(user=self.request.user)
+        TaskHistory.objects.create(task=task, user=self.request.user, status="created")
 
 # Retrieve, Update & Delete Task
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
