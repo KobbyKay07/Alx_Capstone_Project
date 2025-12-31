@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, BasePermission, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from .permissions import IsOwnerOrAdmin, IsOwnerOrCollaborator
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
@@ -110,27 +111,11 @@ class UserListCreateView(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
 
-class IsOwnerOrAdmin(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj == request.user or request.user.is_staff
-
 # Retrieve, Update & Delete User
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
-
-class IsOwner(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
-    
-class IsOwnerOrCollaborator(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return (
-            obj.user == request.user or
-            request.user in obj.collaborators.all() or
-            request.user.is_staff
-        )
 
 # Create & List Tasks 
 class TaskListCreateView(generics.ListCreateAPIView):
