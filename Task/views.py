@@ -267,3 +267,24 @@ def mark_notification_read(request, pk):
     notification.save()
     return Response(NotificationSerializer(notification).data)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def task_statistics(request):
+    user_tasks = Tasks.objects.filter(user=request.user)
+    shared_tasks = Tasks.objects.filter(collaborators=request.user)
+    
+    stats = {
+        "total_tasks": user_tasks.count() + shared_tasks.count(),
+        "pending_tasks": user_tasks.filter(status='pending').count() + 
+                         shared_tasks.filter(status='pending').count(),
+        "in_progress_tasks": user_tasks.filter(status='in_progress').count() + 
+                           shared_tasks.filter(status='in_progress').count(),
+        "completed_tasks": user_tasks.filter(status='completed').count() + 
+                          shared_tasks.filter(status='completed').count(),
+        "high_priority_tasks": user_tasks.filter(priority='high').count() + 
+                              shared_tasks.filter(priority='high').count(),
+        "overdue_tasks": user_tasks.filter(due_date__lt=timezone.now(), status__in=['pending', 'in_progress']).count() + 
+                        shared_tasks.filter(due_date__lt=timezone.now(), status__in=['pending', 'in_progress']).count(),
+    }
+    
+    return Response(stats)
