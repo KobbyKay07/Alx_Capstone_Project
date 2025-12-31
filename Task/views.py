@@ -236,9 +236,9 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
     
-class CollaboratorListView(generics.RetrieveAPIView):
+class CollaboratorListView(generics.ListAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrCollaborator]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         try:
