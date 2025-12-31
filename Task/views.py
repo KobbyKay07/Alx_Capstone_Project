@@ -216,13 +216,22 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 class TaskHistoryListView(generics.ListAPIView):
     serializer_class = TaskHistorySerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['task','status']
+    ordering_fields = ['changed_at']
 
     def get_queryset(self):
-        return TaskHistory.objects.filter(user=self.request.user)
+        return TaskHistory.objects.filter(
+            Q(task__user=self.request.user) | 
+            Q(task__collaborators=self.request.user)
+        ).distinct()
     
 class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['is_read', 'task']
+    ordering_fields = ['created_at']
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
