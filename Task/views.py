@@ -100,6 +100,12 @@ def add_collaborator(request, pk):
         collaborator = User.objects.get(pk=collaborator_id)
     except User.DoesNotExist:
         return Response({"error": "Collaborator not found."}, status=404)
+    
+    if collaborator == request.user:
+        return Response({"error": "You are already the owner of this task."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if task.collaborators.filter(pk=collaborator_id).exists():
+        return Response({"error": "User is already a collaborator."}, status=status.HTTP_400_BAD_REQUEST)
 
     task.collaborators.add(collaborator)
     return Response({"message": f"{collaborator.username} added as collaborator."})
