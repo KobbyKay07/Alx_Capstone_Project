@@ -245,6 +245,11 @@ class CollaboratorListView(generics.ListAPIView):
             task = Tasks.objects.get(pk=pk)
         except Tasks.DoesNotExist:
             return Response({"error": "Task not found."}, status=404)
+        
+        if not (task.user == request.user or 
+                request.user in task.collaborators.all() or 
+                request.user.is_staff):
+            return Response({"error": "You don't have permission to view collaborators."}, status=status.HTTP_403_FORBIDDEN)
 
         collaborators = task.collaborators.all()
         serializer = UserSerializer(collaborators, many=True)
