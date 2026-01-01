@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (TaskListCreateView, TaskDetailView, UserListCreateView, UserSignUpView, 
                     UserDetailView, mark_task_in_progress, mark_task_pending, mark_task_complete,
                     CategoryListCreateView, TaskHistoryListView, add_collaborator,remove_collaborator,
-                    CollaboratorListView, NotificationListView
+                    CollaboratorListView, NotificationListView, mark_notification_read, task_statistics
                     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 
@@ -33,5 +33,8 @@ urlpatterns = [
     path("tasks/<int:pk>/remove-collaborator/", remove_collaborator, name="remove-collaborator"),
     path("tasks/<int:pk>/collaborators/", CollaboratorListView.as_view(), name="list-collaborators"),
     # Notification endpoint
-    path("notifications/", NotificationListView.as_view(), name="notification-list")
+    path("notifications/", NotificationListView.as_view(), name="notification-list"),
+    path("notifications/<int:pk>/read/", mark_notification_read, name="mark-notification-read"),
+    # Task statistics endpoint
+    path("tasks/statistics/", task_statistics, name="task-statistics"),
 ]
