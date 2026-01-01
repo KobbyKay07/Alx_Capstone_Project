@@ -240,6 +240,16 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
 
+    def test_mark_notification_read(self):
+        notification = Notification.objects.create(
+            task=self.task, 
+            user=self.user, 
+            message="Test notification"
+        )
+        response = self.client.patch(f"/api/notifications/{notification.id}/read/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_read"])
+
 
 class HistoryAPITest(APITestCase):
     def setUp(self):
