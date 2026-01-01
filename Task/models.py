@@ -15,6 +15,10 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="categories")
 
+    class Meta:
+        verbose_name_plural = "Categories"
+        unique_together = ['name', 'user']
+
     def __str__(self):
         return self.name
     
@@ -51,6 +55,10 @@ class Tasks(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks")
     collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="shared_tasks", blank=True)
 
+    class Meta:
+        verbose_name_plural = "Tasks"
+        ordering = ['-due_date']
+
     def __str__(self):
         return self.title
     
@@ -59,6 +67,10 @@ class TaskHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=15)
     changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Task Histories"
+        ordering = ['-changed_at']
 
     def __str__(self):
         return f"{self.task.title} - {self.status} at {self.changed_at}"
@@ -70,5 +82,9 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name_plural = "Notifications"
+        ordering = ['-created_at', 'is_read']
+        
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
