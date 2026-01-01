@@ -267,3 +267,28 @@ class HistoryAPITest(APITestCase):
         response = self.client.get("/api/tasks/history/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+class StatisticsAPITest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", email="test@example.com", password="pass123")
+        self.client.force_authenticate(user=self.user)
+        
+        Tasks.objects.create(
+            title="Pending Task",
+            user=self.user,
+            due_date=timezone.now() + timedelta(days=1),
+            status="pending"
+        )
+        Tasks.objects.create(
+            title="Completed Task",
+            user=self.user,
+            due_date=timezone.now() + timedelta(days=1),
+            status="completed"
+        )
+
+    def test_task_statistics(self):
+        response = self.client.get("/api/tasks/statistics/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["total_tasks"], 2)
+        self.assertEqual(response.data["pending_tasks"], 1)
+        self.assertEqual(response.data["completed_tasks"], 1)
