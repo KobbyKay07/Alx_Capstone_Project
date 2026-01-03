@@ -56,12 +56,12 @@ def mark_task_in_progress(request, pk):
     if not (task.user == request.user or request.user in task.collaborators.all() or request.user.is_staff):
          return Response({"error": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-    old_staus = task.status
+    old_status = task.status
     serializer = TaskSerializer(task, data={"status": "in_progress"}, partial=True)
     if serializer.is_valid():
         serializer.save()
 
-        if old_staus != "in_progress":
+        if old_status != "in_progress":
             TaskHistory.objects.create(task=task, user=request.user, status="in_progress")
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

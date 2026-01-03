@@ -102,7 +102,7 @@ class TaskSerializer(serializers.ModelSerializer):
         if old_status != 'completed' and new_status == 'completed':
             instance.completed_at = timezone.now()
 
-                # Handle recurrence
+            # Handle recurrence
             if instance.recurrence != "none":
                 new_due_date = None
                 if instance.recurrence == "daily":
