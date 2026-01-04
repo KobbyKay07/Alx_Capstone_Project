@@ -31,7 +31,13 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default="unsafe-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost']
+ALLOWED_HOSTS = [
+    'Kesben.pythonanywhere.com',
+        'kesben.pythonanywhere.com',
+        '.pythonanywhere.com',
+        '127.0.0.1',
+        'localhost',
+]
 
 # Application definition
 INSTALLED_APPS = [
